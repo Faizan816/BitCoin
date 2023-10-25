@@ -1,27 +1,46 @@
-import axios from "axios";
-import React, { useEffect } from "react";
-import { Text, View } from "react-native";
+import {
+  Text,
+  View,
+  StyleSheet,
+  SafeAreaView,
+  StatusBar,
+  ScrollView,
+  TouchableOpacity,
+  FlatList,
+} from "react-native";
+import { useEffect, useState } from "react";
+import { loadData } from "../customHooks/loadData";
+import { checkUpdate } from "../customHooks/checkUpdate";
 
-const ApiComponent = () => {
-	useEffect(() => {
-		// Define the API endpoint
-		const apiUrl = "https://api.coindesk.com/v1/bpi/currentprice.json"; // Example API
-		// Make an API request
-		axios
-			.get(apiUrl)
-			.then((response) => {
-				console.log("API Response:", response.data);
-			})
-			.catch((error) => {
-				console.error("API Error:", error);
-			});
-	}, []);
+export default function ApiComponent() {
+  const [data, setData] = useState([]);
 
-	return (
-		<View>
-			<Text>Check the console for API response</Text>
-		</View>
-	);
-};
+  useEffect(() => {
+    const update = checkUpdate();
+    populate(update);
+  }, []);
 
-export default ApiComponent;
+  async function populate(update) {
+    setData([await loadData(update)]);
+  }
+
+  return (
+    <SafeAreaView>
+      <StatusBar />
+      <View style={styles.container}>
+        <FlatList
+          data={data}
+          renderItem={({ item }) => (
+            <TouchableOpacity style={{ padding: 20 }}>
+              <Text>{item}</Text>
+            </TouchableOpacity>
+          )}
+        />
+      </View>
+    </SafeAreaView>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: {},
+});
